@@ -1,9 +1,8 @@
 package com.craftinginterpreters.lox;
 
+import static com.craftinginterpreters.lox.TokenType.*;
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.craftinginterpreters.lox.TokenType.*;
 
 /**
  *
@@ -93,10 +92,32 @@ public class Scanner {
 			case '\n':
 				line++;
 				break;
+			case '"':
+				string();
+				break;
 			default:
 				Lox.error(line, "Unexpected character.");
 				break;
 		}
+	}
+
+	private void string() {
+		while (peek() != '"' && !isAtEnd()) {
+			if (peek() == '\n') {
+				line++;
+			}
+			advance();
+		}
+
+		if (isAtEnd()) {
+			Lox.error(line, "Unterminated string.");
+			return;
+		}
+
+		advance();
+
+		String value = source.substring(start + 1, current - 1);
+		addToken(STRING, value);
 	}
 
 	private char peek() {
